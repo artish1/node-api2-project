@@ -133,6 +133,7 @@ router.post("/:id/comments", (req, res) => {
     });
 });
 
+//Delete post by ID
 router.delete("/:id", (req, res) => {
   const id = req.params.id;
 
@@ -159,6 +160,44 @@ router.delete("/:id", (req, res) => {
     .catch(err => {
       console.log("Error on DELETE /:id when finding post by id", err);
       res.status(500).json({ error: "There was an error finding post by id" });
+    });
+});
+
+router.put("/:id", (req, res) => {
+  const id = req.params.id;
+
+  if (!req.body.title || !req.body.contents)
+    res.status(400).json({
+      errorMessage: "Please provide title and contents for the post."
+    });
+
+  db.findById(id)
+    .then(posts => {
+      if (posts.length > 0) {
+        db.update(id, req.body)
+          .then(updatedRecords => {
+            res.status(200).json({ updatedRecords });
+          })
+          .catch(err => {
+            console.log("Error on PUT /:id when updating post", err);
+            res
+              .status(500)
+              .json({ error: "The post information could not be modified." });
+          });
+      } else {
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      }
+    })
+    .catch(err => {
+      console.log(
+        "Error on PUT /:id in postsRouter when finding post by id",
+        err
+      );
+      res
+        .status(500)
+        .json({ error: "There was an error finding the post by id" });
     });
 });
 

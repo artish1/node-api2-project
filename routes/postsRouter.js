@@ -74,12 +74,10 @@ router.get("/:id/comments", (req, res) => {
               "Error on GET /:id/comments when trying to get comments",
               err
             );
-            res
-              .status(500)
-              .json({
-                message:
-                  "There was an error retrieving the comments from the post"
-              });
+            res.status(500).json({
+              message:
+                "There was an error retrieving the comments from the post"
+            });
           });
       } else {
         res
@@ -132,6 +130,35 @@ router.post("/:id/comments", (req, res) => {
       res.status(500).json({
         error: "There was an error while finding the post id to the database"
       });
+    });
+});
+
+router.delete("/:id", (req, res) => {
+  const id = req.params.id;
+
+  db.findById(id)
+    .then(posts => {
+      if (posts.length > 0) {
+        db.remove(id)
+          .then(recordsDeleted => {
+            res.json({ recordsDeleted });
+          })
+          .catch(err => {
+            console.log(
+              "Error on DELETE /:id when trying to delete the post",
+              err
+            );
+            res.status(500).json({ error: "The post could not be removed" });
+          });
+      } else {
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      }
+    })
+    .catch(err => {
+      console.log("Error on DELETE /:id when finding post by id", err);
+      res.status(500).json({ error: "There was an error finding post by id" });
     });
 });
 

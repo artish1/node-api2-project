@@ -32,10 +32,49 @@ router.post("/", (req, res) => {
       .catch(err => {
         console.log("Error on POST / in postsRouter", err);
         res.status(500).json({
-          error: "There was an error while saving the comment to the database"
+          error: "There was an error while saving the post to the database"
         });
       });
   }
+});
+
+router.post("/:id/comments", (req, res) => {
+  if (!req.body.text)
+    res
+      .status(400)
+      .json({ errorMessage: "Please provide text for the comment." });
+
+  const id = req.params.id;
+
+  db.findById(id)
+    .then(post => {
+      if (post.length > 0) {
+        db.insertComment({ post_id: id, text: req.body.text })
+          .then(comment => {
+            res.status(201).json(comment);
+          })
+          .catch(err => {
+            console.log(
+              "Error on POST /:id/comments in postsRouter while inserting comment",
+              err
+            );
+            res.status(500).json({
+              error:
+                "There was an error while saving the comment to the database"
+            });
+          });
+      } else {
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      }
+    })
+    .catch(err => {
+      console.log("Error on POST /:id/comments in postsRouter", err);
+      res.status(500).json({
+        error: "There was an error while finding the post id to the database"
+      });
+    });
 });
 
 module.exports = router;

@@ -18,6 +18,27 @@ router.get("/", (req, res) => {
     });
 });
 
+//Get post by id
+router.get("/:id", (req, res) => {
+  const id = req.params.id;
+  db.findById(id)
+    .then(post => {
+      if (post.length > 0) {
+        res.json(post);
+      } else {
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      }
+    })
+    .catch(err => {
+      console.log("Error on GET /:id in postsRouter", err);
+      res
+        .status(500)
+        .json({ error: "The post information could not be retrieved." });
+    });
+});
+
 //Create a Post.
 router.post("/", (req, res) => {
   if (!req.body.title || !req.body.contents) {

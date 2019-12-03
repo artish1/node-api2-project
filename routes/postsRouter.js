@@ -59,6 +59,43 @@ router.post("/", (req, res) => {
   }
 });
 
+//Get comments of a post from post id
+router.get("/:id/comments", (req, res) => {
+  const id = req.params.id;
+  db.findById(id)
+    .then(posts => {
+      if (posts.length > 0) {
+        db.findPostComments(id)
+          .then(comments => {
+            res.json(comments);
+          })
+          .catch(err => {
+            console.log(
+              "Error on GET /:id/comments when trying to get comments",
+              err
+            );
+            res
+              .status(500)
+              .json({
+                message:
+                  "There was an error retrieving the comments from the post"
+              });
+          });
+      } else {
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      }
+    })
+    .catch(err => {
+      console.log("Error on GET /:id/comments when finding post by id", err);
+      res
+        .status(500)
+        .json({ error: "There was an error trying to find post by id" });
+    });
+});
+
+//Create a comment
 router.post("/:id/comments", (req, res) => {
   if (!req.body.text)
     res
